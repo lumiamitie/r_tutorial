@@ -5,21 +5,39 @@ date: "Sunday, January 18, 2015"
 output: html_document
 ---
 
+네이선 아우의 Visualize this 책에 있는 내용 중 R로 실습할 수 있는 내용들을 기준으로 소개하고 일부 내용을 추가하였다
+
+이번 자료에서는 책의 내용들을 위주로 실습하고 이후에는 `ggplot2`, `ggvis` 등 다른 시각화 패키지들을 살펴볼것이다
+
+.... 것입니다
+
+-----------------
+
+우리가 시각화할 자료를 크게 **시간**, **분포**, **관계**, **비교**, **공간** 으로 구분하여
+
+각각의 자료에 맞는 다양한 차트를 R로 그리는 방법을 알아보자
+
+-----------------
 
 #시간 시각화
+
 ##막대 그래프
 
 일단 데이터를 불러온다
 
 ```{r}
-hotdogs = read.csv("http://datasets.flowingdata.com/hot-dog-contest-winners.csv", sep="," , header=T) 
+hotdogs = read.csv("http://datasets.flowingdata.com/hot-dog-contest-winners.csv", 
+                   sep = "," , 
+                   header = T) 
+
 # 이게 정석이다. 
 # sep옵션을 통해 자료가 무슨 기호를 통해 구분되는지 명시해주고
-# header 옵션을 통해 첫번째 열에 열 이름이 있느지 없는지 알려준다
+# header 옵션을 통해 첫번째 열에 열 이름이 있는지 없는지 알려준다
 
 # 근데 없어도 됨
-# 개떡같이말해도 철썩같이 알아듣는다
+# 개떡같이말해도 찰떡같이 알아듣는다
 # 못알아들으면 알아듣게 해줘야 함
+
 head(read.csv("http://datasets.flowingdata.com/hot-dog-contest-winners.csv") )
 
 
@@ -42,28 +60,44 @@ head(read.csv("http://datasets.flowingdata.com/hot-dog-contest-winners.csv") )
 
 `barplot` 함수를 쓰면 막대그래프를 그릴 수 있다
 
-기본적으로 많이 쓰게 될 `plot`함수의 경우 기본적으로는 산점도(Scatter Plot)을 그리게 된다
+보통 많이 쓰게 될 `plot`함수의 경우 기본적으로는 산점도(Scatter Plot)을 그리게 된다
+
 ```{r}
 barplot(hotdogs$Dogs.eaten)
 plot(hotdogs$Dogs.eaten)
 ```
 
-#막대에 연도 라벨 추가
+###막대에 연도 라벨 추가
+
 names.arg 옵션을 추가해서 연도에 해당하는 라벨을 만들 수 있다
+
 ```{r}
-barplot(hotdogs$Dogs.eaten, names.arg=hotdogs$Year)
+barplot(hotdogs$Dogs.eaten, 
+        names.arg = hotdogs$Year)
 ```
 
-#축의 라벨, 외곽선 설정, 색상
+###축의 라벨, 외곽선 설정, 색상
+
+막대기에 색을 넣어보자
+
+`col` 에 빨간색을 넣어보고 외곽선은 없애버린다
+
 ```{r}
-barplot(hotdogs$Dogs.eaten, names.arg=hotdogs$Year, col="red", border=NA, xlab="Year", ylab="Hotdogs and buns (HDB) eaten")
+barplot(hotdogs$Dogs.eaten, 
+        names.arg = hotdogs$Year, 
+        col = "red", 
+        border = NA, 
+        xlab = "Year", 
+        ylab = "Hotdogs and buns (HDB) eaten")
 ```
 
 미국인이 우승한 해의 막대와 그렇지 않은 해의 색상을 구분해보자.
 
 색상정보를 담은 리스트 or 벡터를 만들어야 한다
+
 ```{r}
 fill_colors = c()
+
 for (i in 1:length(hotdogs$Country)){
   if (hotdogs$Country[i] == "United States"){
       fill_colors = c(fill_colors,"#821122")
@@ -75,31 +109,41 @@ for (i in 1:length(hotdogs$Country)){
 
 barplot(hotdogs$Dogs.eaten, 
         names.arg = hotdogs$Year, 
-        col=fill_colors, 
-        border=NA, 
-        xlab="Year", 
-        ylab="Hotdogs and buns (HDB) eaten")
+        col = fill_colors, 
+        border = NA, 
+        xlab = "Year", 
+        ylab = "Hotdogs and buns (HDB) eaten")
 ```
 
-space 옵션을 통해 막대간격을 조정할 수 있다
+`space` 옵션을 통해 막대간격을 조정할 수 있다
 
-main 옵션으로는 제목을 설정한다
+`main` 옵션으로는 제목을 설정한다
+
 ```{r}
 barplot(hotdogs$Dogs.eaten, 
         names.arg = hotdogs$Year, 
         col = fill_colors, 
         border=NA, 
         space = 0.3,
-        main="Nathan's Hot Dog Eating Contest Results, 1980-2010",
-        xlab="Year", 
-        ylab="Hotdogs and buns (HDB) eaten")
+        main = "Nathan's Hot Dog Eating Contest Results, 1980-2010",
+        xlab = "Year", 
+        ylab = "Hotdogs and buns (HDB) eaten")
 ```
 
 
-#누적 막대 그래프 그리기
+##누적 막대 그래프
+
+데이터를 불러온다
+
 ```{r}
-hot_dog_places = read.csv("http://datasets.flowingdata.com/hot-dog-places.csv",sep=",",header=T)
+hot_dog_places = read.csv("http://datasets.flowingdata.com/hot-dog-places.csv",
+                          sep = ",",
+                          header = T)
+head(hot_dog_places)
 ```
+
+한 열이 한 해의 기록을 나타내고 행은 위에서부터 1,2,3위 입상자를 나타낸다
+
 열이름이 숫자로 되어있을 경우 R에서 자동으로 'X'를 앞에 붙여 String으로 만든다.
 
 원래대로 수정해주자
@@ -108,7 +152,12 @@ hot_dog_places = read.csv("http://datasets.flowingdata.com/hot-dog-places.csv",s
 names(hot_dog_places) = c("2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010")
 ```
 
-이 경우 데이터 프레임인 hot_dog_places 를 행렬로 바꿔줘야한다.
+이 경우 데이터 프레임인 `hot_dog_places` 를 행렬로 바꿔줘야한다.
+
+`as.matrix` 함수를 사용하자
+
+`space = 0.25`는 막대들 사이의 간격이 막대 너비의 0.25라는 것이다
+
 ```{r}
 hot_dog_matrix = as.matrix(hot_dog_places)
 
@@ -119,7 +168,11 @@ barplot(hot_dog_matrix,
         xlab = "Year", 
         ylab = "Hot dogs and buns (HDBs) eaten",
         main = "Hot Dog Eating Contest Results, 1980-2010")
+```
 
+색을 바꿔보자
+
+```{r}
 barplot(hot_dog_matrix, 
         border = NA, 
         col = c("magenta","cyan","yellow"),
@@ -127,20 +180,67 @@ barplot(hot_dog_matrix,
         ylim = c(0,200), 
         xlab = "Year", 
         ylab = "Hot dogs and buns (HDBs) eaten",
-        main="Hot Dog Eating Contest Results, 1980-2010")
+        main = "Hot Dog Eating Contest Results, 1980-2010")
 ```
 
-#스캐터플롯
+##스캐터플롯
+
 데이터부터 불러오자
+
 ```{r}
-subscribers = read.csv("http://datasets.flowingdata.com/flowingdata_subscribers.csv",sep=",",header=T)
+subscribers = read.csv("http://datasets.flowingdata.com/flowingdata_subscribers.csv",
+                       sep = ",",
+                       header = T)
+head(subscribers)
 ```
+
+**Date** 날짜
+
+**Subscribers** 구독자 수
+
+**Reach** 접속자 수
+
+**Item.Views** 읽은 글 수
+
+**Hits** 접속 수
+
+구독자 수로 그림을 그려보자
+
+일단 위에서 설명했듯이 plot으로 그리면 산점도가 나오는게 기본이다
 
 ```{r}
 plot(subscribers$Subscribers)
-plot(subscribers$Subscribers,type="p", ylim=c(0,30000))
 ```
-type 그래프 형태 : p는 점 h는 고밀도 수직선 그래프
+
+**type** 그래프 형태 : `p`는 점으로 표현되고 `h`로 하면 고밀도 수직선 그래프
+
+ylim 을 통해 y값의 표현 범위를 정할 수 있다.
+
+```{r}
+plot(subscribers$Subscribers,
+     type = "p", 
+     ylim = c(0,30000))
+```
+
+
+
+```{r}
+plot(subscribers$Subscribers, 
+     type = "h", 
+     ylim = c(0,30000), 
+     xlab = "Day", 
+     ylab = "Subscribers")
+
+points(subscribers$Subscribers, 
+       pch = 19, 
+       col = "black")
+```
+
+`plot`함수의 경우 실행되면 새로운 그래픽을 생성해버린다
+
+반면 `points`,`lines`, `abline` 등의 함수는 화면에 있는 그래픽위에 내용을 덮어쓰기만 한다
+
+`points`함수에서 `pch` 는 점의 크기를 의미한다
 
 ```{r}
 plot(subscribers$Subscribers, type="h", ylim=c(0,30000), xlab="Day", ylab="Subscribers")
@@ -148,39 +248,108 @@ points(subscribers$Subscribers, pch=19, col="black")
 abline(0,1000)
 ```
 
+`abline` 함수는 `abline(a,b)` 로 구성되는데 y = a + bx 라고 생각하면 된다
+
+-------------
+
 #연속형 데이터
-#시계열 그래프
+
+##시계열 그래프
+
+세계은행에서 발표한 세계 인구 데이터이다
 ```{r}
-population = read.csv("http://datasets.flowingdata.com/world-population.csv", sep=",", header=T)
-plot(population$Year,population$Population,type="l", ylim=c(3000000000, 7000000000),xlab="Year", ylab="Population")
+population = read.csv("http://datasets.flowingdata.com/world-population.csv", 
+                      sep = ",", 
+                      header = T)
+head(population)
+
 ```
 
-#계단식 그래프
+각각 연도와 인구를 나타낸다
+
+`type = "l"` 을 이용해 선으로 연결할 수 있다
+
 ```{r}
-postage = read.csv("http://datasets.flowingdata.com/us-postage.csv", sep=",", header=T)
-plot(postage$Year, postage$Price, type="s")
+plot(population$Year,population$Population,
+     type = "l", 
+     ylim = c(3000000000, 7000000000),
+     xlab = "Year", 
+     ylab = "Population")
 ```
 
-type s
+##계단식 그래프
+
+미국의 우편요금 변화 기록이다
+
 ```{r}
-plot(postage$Year, postage$Price, type="s", main="US Postage Rates for Letters, First Ounce, 1991-2010",
-     xlab="Year",ylab="Postage Rate (Dallars)")
+postage = read.csv("http://datasets.flowingdata.com/us-postage.csv", 
+                   sep=",", 
+                   header=T)
+
+head(postage)
 ```
 
-#loess
+각각 연도와 요금(달러)이다
+
+`type = "s"`로 계단식 그래프를 그릴 수 있다. s는 step이다 l은 line, p 는 point 겠지..
+
+```{r}
+plot(postage$Year, postage$Price, 
+     type = "s")
+```
+
+
+```{r}
+plot(postage$Year, postage$Price, 
+     type = "s", 
+     main = "US Postage Rates for Letters, First Ounce, 1991-2010",
+     xlab = "Year",
+     ylab = "Postage Rate (Dallars)")
+```
+
+계단식 그래프를 통해 단계적으로 우편 요금이 증가하는 모습을 확인할 수 있다
+
+그냥 선으로 이어버리면 우편요금이 일정하게 유지되는 구간을 보여줄 수 없다
+
+##loess
+
+**Locally Weighted ScatterPlot Smoothing** 으로 데이터의 곡률에 맞는 추세선을 그리는 방법이다
+
+데이터를 작은 조각으로 쪼개서 각 조각마다 추세선을 만들고 종합해서 하나의 곡선 추세선을 형성한다
+
+데이터가 곡선의 추세를 보일 때 사용하자
+
+일단 데이터
+
 미국 실업률 1948-2010
-```{r}
-unemployment = read.csv("http://datasets.flowingdata.com/unemployment-rate-1948-2010.csv",sep=",")
-```
 
 ```{r}
-plot(1:length(unemployment$Value),unemployment$Value)
-lnth=1:length(unemployment$Value)
+unemployment = read.csv("http://datasets.flowingdata.com/unemployment-rate-1948-2010.csv",
+                        sep=",")
+
+head(unemployment)
+```
+
+
+일단 직선으로 fitting한 결과이다
+
+`lm` 은 linear model 함수인데 여기서는 직선으로 회귀식을 그렸다
+
+intercept와 slope를 반환하기 때문에 abline에 바로 넣으면 직선 추세선을 그릴 수 있다.
+
+```{r}
+plot(1:length(unemployment$Value), unemployment$Value)
+lnth = 1:length(unemployment$Value)
 abline(lm(unemployment$Value ~ lnth))
-scatter.smooth(x=1:length(unemployment$Value),y=unemployment$Value)
 ```
 
-degree와 span으로 곡률 조정
+다음은 loess 추세선이다
+
+```{r}
+scatter.smooth(x = 1:length(unemployment$Value), y = unemployment$Value)
+```
+
+degree와 span으로 곡률을 조정할 수 있다
 
 
 자세한 옵션이 궁금하면 `?scatter.smooth`을 통해 살펴보자
@@ -189,15 +358,55 @@ degree와 span으로 곡률 조정
 ---------------
 
 #분포 시각화
-#트리맵 만들기
+##트리맵
+
+플로잉데이터라는 저자의 블로그에서 가장 인기있는 글 100를 선정하여 카테고리별로 시각화를 하겠다고 한다
+
 ```{r}
 posts = read.csv("http://datasets.flowingdata.com/post-data.txt")
-#install.packages("portfolio")
-library(portfolio)
-map.market(id = posts$id, area = posts$views, group = posts$category, color = posts$comments, main = "FlowingData Map")
+
+head(posts)
 ```
 
+**id** 아이디
+
+**views** 페이지뷰
+
+**comments** 댓글
+
+**category** 분류
+
+포트폴리오 패키지는 원래 주식시장의 포트폴리오를 만들기 위해서 쓰는 패키지인데
+
+트리맵 만들기가 편해서 일단 이용해본다
+
+트리맵은 영역 기반의 시각화로, 각 사각형의 넓이가 수치를 나타낸다
+
+위계 구조가 있는 데이터나 트리 구조의 데이터를 표시할 때 적당하다
+
+```{r}
+#install.packages("portfolio")
+library(portfolio)
+map.market(id = posts$id, 
+           area = posts$views, 
+           group = posts$category, 
+           color = posts$comments, 
+           main = "FlowingData Map")
+```
+
+`id` 는 사각형으로 표시할 데이터의 접근자
+
+`area`는 면적에 반영할 값
+
+`group`은 사각형을 그룹으로 묶는데 사용되고
+
+`color`를 이용해 댓글 열에 따라서 구분한다
+
+--------------------
+
 #파이 차트
+
+Visualize This에 내용이 없어서 추가했다
 
 ##Simple Pie Chart
 ```{r}
@@ -209,64 +418,152 @@ pie(slices, labels = lbls, main="Pie Chart of Countries")
 ## Pie Chart with Percentages
 ```{r}
 slices <- c(10, 12, 4, 16, 8) 
+
 lbls <- c("US", "UK", "Australia", "Germany", "France")
-pct <- round(slices/sum(slices)*100)
+
+pct <- round(slices / sum(slices) * 100)
+
 lbls <- paste(lbls, pct) # add percents to labels 
+
 lbls <- paste(lbls,"%",sep="") # ad % to labels 
-pie(slices,labels = lbls, col=rainbow(length(lbls)),main="Pie Chart of Countries")
+
+pie(slices, 
+    labels = lbls, 
+    col = rainbow(length(lbls)),
+    main = "Pie Chart of Countries")
 ```
 
 ## Pie Chart from data frame with Appended Sample Sizes
 ```{r}
 mytable <- table(iris$Species)
+
 lbls <- paste(names(mytable), "\n", mytable, sep="")
-pie(mytable, labels = lbls, main="Pie Chart of Species\n (with sample sizes)")
+
+pie(mytable, 
+    labels = lbls, 
+    main = "Pie Chart of Species\n (with sample sizes)")
 ```
 
 ----------------
 
 #관계 시각화
 ##Scatter Plot
+
+다음 데이터는 미국의 2005년 범죄 유형별 발생건을 인구 100000명 당 발생 비율로 나타낸 결과이다
+
+범죄 유형에 따라 7가지로 나뉜다 (*살인*, *절도*, *강간*, *강도*, *폭행*, *차량절도*, *절취*)
+
 ```{r}
-crime = read.csv("http://datasets.flowingdata.com/crimeRatesByState2005.csv", sep=",",header=T)
+crime = read.csv("http://datasets.flowingdata.com/crimeRatesByState2005.csv", 
+                 sep = ",",
+                 header = T)
+
+head(crime)
+```
+
+일단 살인과 절도 항목에 대해서만 비교해보자
+
+```{r}
 plot(crime$murder, crime$burglary) #살인에 대한 절도 범죄 건수
 ```
+
+오른쪽 끝의 아웃라이어 때문에 상관관계를 보기가 힘들다
+
+워싱턴DC인데 빼고나서 확인해보자
+
+미국 전체에 대한 항목도 빼버린다
+
 ```{r}
 crime2 = crime[crime$state != "District of Columbia",] #아웃라이어를 일단 제거하고 해보자
 crime2 = crime2[crime2$state != "United States",] #미국 전체 데이터도 제거
+
 plot(crime2$murder, crime2$burglary)
-plot(crime2$murder, crime2$burglary,xlim=c(0,10),ylim=c(0,1200)) #축 조정
-scatter.smooth(crime2$murder, crime2$burglary, xlim=c(0,10), ylim=c(0,1200)) #loess 추세선 추가
+```
+
+축이 0부터 시작하는게 좋은 것 같다
+
+```{r}
+plot(crime2$murder, crime2$burglary,
+     xlim = c(0,10),
+     ylim = c(0,1200))
+```
+
+절도와 살인 발생 비율의 관계를 분명하게 확인하기 위해 추세선을 그려보자
+```{r}
+scatter.smooth(crime2$murder, crime2$burglary, 
+               xlim = c(0,10), 
+               ylim = c(0,1200))
 ```
 
 ##Scatter Plot matrix
+
+위에서 두 개 변수 사이의 관계를 봤으니 이번에는 여러 변수의 관계를 보고싶다
+
 ```{r}
 plot(crime2[,2:9])
-pairs(crime2[,2:9], panel = panel.smooth) #추세선을 포함
+```
+
+주의 이름을 나타내는 열을 빼고 전부 `plot`에 넣었더니 이렇게 뽑아준다
+
+추세선을 넣어보자
+
+```{r}
+pairs(crime2[,2:9], 
+      panel = panel.smooth)
 ```
 
 panel 인수는 x, y에 대한 함수를 변수로 받아 전달한다
 
 예제 코드에선 panel.smooth() 함수(LOESS 추세선을 그려주는 함수)를 전달했다.
 
-자신이 만든 함수도 전달가능
+자신이 만든 함수도 넣을 수 있다
 
-#Burble Chart
+##Burble Chart
+
+스캐터플롯에 버블의 크기로 세 번째 변수를 나타내는 그래프이다
+
+주의해야할 점은 세번째 변수의 값은 반지름이나 지름이 아니라 **면적**으로 표현되어야 한다
+
 ```{r}
-crime = read.csv("http://datasets.flowingdata.com/crimeRatesByState2005.tsv", header=T, sep="\t")
-symbols(crime$murder, crime$burglary, circles = crime$population)
+crime = read.csv("http://datasets.flowingdata.com/crimeRatesByState2005.tsv", 
+                 header = T, 
+                 sep = "\t")
 ```
 
-원의 면적을 통해 데이터를 표현하자 (반지름 X)
+앞에 있던 예제와 거의 같은 데이터이다
+
+쉼표 대신 탭으로 구분하는 tsv 파일이므로 구분자를 `\t`로 변경해주자
+
+```{r}
+symbols(crime$murder, crime$burglary, 
+        circles = crime$population)
+```
+
+반지름에 데이터가 들어가니 원이 너무 커진다
+
+원의 면적을 통해 데이터를 표현하자
 
 **원의 면적** : pi * r^2
 
 **r = sqrt(원의면적/pi)** 여기서는 비례를 구하려는 것이니 파이는 무시해도 된다
 
 ```{r}
-radius = sqrt(crime$population/pi)
-symbols(crime$murder, crime$burglary, circles = radius) #음.... 원이 전체적으로 다 커보인다
-symbols(crime$murder, crime$burglary, circles = radius, inches=0.35, fg="white", bg="red", xlab="Murder Rate", ylab="Burglary Rate")
+radius = sqrt(crime$population / pi)
+
+symbols(crime$murder, crime$burglary, 
+        circles = radius) #음.... 원이 전체적으로 다 커보인다
+```
+
+모든 원의 크기를 전체적으로 줄일 필요가 있는것같다
+
+```{r}
+symbols(crime$murder, crime$burglary, 
+        circles = radius, 
+        inches = 0.35, 
+        fg = "white", 
+        bg = "red", 
+        xlab = "Murder Rate", 
+        ylab = "Burglary Rate")
 ```
 
 **inches** : 가장 큰원의 크기를 inch 단위로 설정
@@ -278,29 +575,50 @@ symbols(crime$murder, crime$burglary, circles = radius, inches=0.35, fg="white",
 symbols 함수는 다른 모형을 선택할 수도 있다.
 
 ```{r}
-symbols(crime$murder,crime$burglary, squares=sqrt(crime$population),inches = 0.5)
-text(crime$murder, crime$burglary, crime$state, cex=0.5)
+symbols(crime$murder,crime$burglary, 
+        squares = sqrt(crime$population),
+        inches = 0.5)
+
+text(crime$murder, crime$burglary, crime$state, 
+     cex = 0.5)
 ```
 
-cex 는 출력 문구의 크기(기본값 1)
+정사각형 `square` 직사각형 `rectangles` 써모미터 `thermometers` 박스플롯 `boxplots` 별 `stars` 등이 선택가능하다
+
+자세한 것은 `?symbols`
+
+cex 는 출력 문구의 크기이다 (기본값 1)
+
+---------------------------
 
 #히스토그램
+
+데이터는 2002년부터 2009년까지 TV크기 분포 그래프이다
+
+참 신기한 데이터가 많다
+
 ```{r}
-tvs=read.table("http://datasets.flowingdata.com/tv_sizes.txt",sep="\t",header=T)
+tvs=read.table("http://datasets.flowingdata.com/tv_sizes.txt",
+               sep = "\t",
+               header = T)
 ```
 
-##아웃라이어 제거
+아웃라이어를 제거한다
+
 ```{r}
 tvs=tvs[tvs$size <80,]
 tvs=tvs[tvs$size >10,]
 ```
 
-##히스토그램 구간 수 설정
+히스토그램 구간 수를 설정한다
 ```{r}
 breaks = seq(10, 80, by=5)
 ```
 
-##레이아웃 설정
+레이아웃을 설정한다
+
+4,2 니깐 4행에 2열 짜리
+
 ```{r}
 par(mfrow=c(4,2))
 ```
@@ -330,20 +648,41 @@ par(mfrow=c(1,1)) # 이건 그냥 디폴트 설정으로 돌리기 위해서
 
 ##히트맵 만들기 
 
-`heatmap()`
+2008년의 NBA 농구선수 통계이다
+
+첫번째열은 선수이름, 나머지는 선수 기록 데이터다
 
 ```{r}
-bball = read.csv("http://datasets.flowingdata.com/ppg2008.csv",header=T) #2008년 NBA 농구선수 통계
-bball_byfgp = bball[order(bball$FGP, decreasing =T),]
+bball = read.csv("http://datasets.flowingdata.com/ppg2008.csv",
+                 header = T)
+
+head(bball)
+```
+
+`order` 함수를 이용해 원하는 값을 기준으로 정렬한다
+
+행이름을 숫자에서 선수이름으로 바꾸자
+
+```{r}
+bball_byfgp = bball[order(bball$FGP, decreasing =T),] 
+
 bball = bball[order(bball$PTS, decreasing = F),]
+
 row.names(bball) = bball$Name #행이름을 선수 이름으로
-bball=bball[,2:20]
+
+bball = bball[,2:20]
 ```
 
 히트맵을 그리려면 데이터프레임이 아니라 행렬 형태여야 한다
 ```{r}
 bball_matrix = data.matrix(bball)
-bball_heatmap = heatmap(bball_matrix, Rowv = NA, Colv = NA, col=cm.colors(256), scale = "column", margins = c(5,10))
+
+bball_heatmap = heatmap(bball_matrix, 
+                        Rowv = NA, 
+                        Colv = NA, 
+                        col = cm.colors(256), 
+                        scale = "column", 
+                        margins = c(5,10))
 ```
 
 scale 인수를 column으로 설정하면 최대최소값을 전체 행렬이 아니라 열기준으로 결정
@@ -356,45 +695,83 @@ scale 인수를 column으로 설정하면 최대최소값을 전체 행렬이 �
 
 따뜻한 색감으로 바꿔보자
 ```{r}
-bball_heatmap = heatmap(bball_matrix, Rowv = NA, Colv = NA, col=heat.colors(256), scale = "column", margins = c(5,10))
+bball_heatmap = heatmap(bball_matrix, 
+                        Rowv = NA, 
+                        Colv = NA, 
+                        col = heat.colors(256), 
+                        scale = "column", 
+                        margins = c(5,10))
+
 cm.colors(10) #10개의 색상 벡터를 확인할 수 있다.
 ```
 
-<0to255.com> 참고
+[0to255](0to255.com) 에서 찾아보는 것도 좋다
 
 색상 코드를 직접 입력해보자
 ```{r}
 red_colors = c("#ffd3cd","#ffc4bc", "#ffb5ab", "#ffa69a", "#ff9789", "#ff8978", "#ff7a67", "#ff6b56", "#ff5c45", "#ff4d34")
-bball_heatmap = heatmap(bball_matrix, Rowv = NA, Colv = NA, col=red_colors, scale = "column", margins = c(5,10))
+
+bball_heatmap = heatmap(bball_matrix, 
+                        Rowv = NA, 
+                        Colv = NA, 
+                        col = red_colors, 
+                        scale = "column", 
+                        margins = c(5,10))
 ```
 
 ##RColorBrewer 패키지
 
+색상 고르기 귀찮으면 설치하자
+
 `?brewer.pal` 을 통해 자세한 옵션 확인
+
 ```{r}
 #install.packages("RColorBrewer")
 library(RColorBrewer)
 bball_heatmap = heatmap(bball_matrix, Rowv = NA, Colv = NA, col=brewer.pal(9,"Blues"), scale = "column", margins = c(5,10))
 ```
 
-#체르노프 페이스
+-------------------
+
+##체르노프 페이스
+
+사람의 얼굴을 쉽게 구분한다는 점에서 착안하여, 데이터를 사람의 얼굴 모양에 대입해서 표현한다
+
+유용성은...글쎄
+
 ```{r}
 #install.packages("aplpack")
 library(aplpack)
-bball = read.csv("http://datasets.flowingdata.com/ppg2008.csv",header=T) #다시 불러오자
-faces(bball[,2:16],ncolors=0)
+
+bball = read.csv("http://datasets.flowingdata.com/ppg2008.csv",
+                 header = T) #다시 불러오자
+
+faces(bball[,2:16],
+      ncolors = 0)
 ```
 
+faces 함수는 최대 15개의 변수까지만 지원한다
+
 #Star Chart
+
+몇 개의 축을 그리고 중앙으로부터의 거리를 통해 수치를 나타낸다
+
+남자들의 경우 위닝에서 선수들 능력치를 본다고 생각하라고 하니까 그림안보고도 이해하더라
+
 ```{r}
-crime = read.csv("http://datasets.flowingdata.com/crimeRatesByState2005.csv", sep=",",header=T) #다시
+crime = read.csv("http://datasets.flowingdata.com/crimeRatesByState2005.csv", 
+                 sep = ",",
+                 header = T) #얘도 다시
 stars(crime)
 ```
+
 
 ```{r}
 row.names(crime) = crime$state #주 이름을 행이름으로
 crime = crime[,2:7] #테이블에서 주 이름을 제거
-stars(crime, flip.labels=FALSE, key.loc = c(15,0.5))
+stars(crime, 
+      flip.labels = FALSE, 
+      key.loc = c(15,0.5))
 ```
 
 flip.labels를 기본값인 T로 놔두면 라벨을 차트의 높이에 따라 위아래를 오가며 배치한다.
@@ -402,42 +779,57 @@ flip.labels를 기본값인 T로 놔두면 라벨을 차트의 높이에 따라 
 key.loc은 범례 위치인것같다
 
 ```{r}
-stars(crime, flip.labels=FALSE, key.loc = c(15,1.5), full =FALSE)
+stars(crime, 
+      flip.labels = FALSE, 
+      key.loc = c(15,1.5), 
+      full = FALSE)
 ```
 
 full옵션을 끄면 윗부분만 가지고 그린다
 
-#Nightingale chart / Polar Area Diagram
+##Nightingale chart / Polar Area Diagram
 
 `draw.segments` 옵션을 켜면 점의 위치 대신 거리로 수치를 나타낸다
 ```{r}
-stars(crime, flip.labels=FALSE, key.loc = c(15,1.5),draw.segments=TRUE)
+stars(crime, 
+      flip.labels = FALSE, 
+      key.loc = c(15,1.5),
+      draw.segments = TRUE)
 ```
 
-#평행좌표계 Parallel coordinates
-```{r}
-education = read.csv("http://datasets.flowingdata.com/education.csv",header=T)
-```
+---------------------
+
+##평행좌표계 Parallel coordinates
+
 
 ```{r}
+education = read.csv("http://datasets.flowingdata.com/education.csv",
+                     header=T)
+
 head(education)
 ```
-주이름 / SAT 읽기 평균 / 수학평균 / 쓰기평균 / SAT응시비율 / 고등학교졸업직후 취업하는학생비율 / 고교 중퇴율
 
-변수들을 분명한 상관관계로 엮을 수 있는가?
+데이터는 주이름 / SAT 읽기 평균 / 수학평균 / 쓰기평균 / SAT응시비율 / 고등학교졸업직후 취업하는학생비율 / 고교 중퇴율 이다
 
-고교 중퇴율이 높은 주는 과연 평균 SAT점수도 낮을까???
+변수들을 분명한 상관관계로 엮을 수 있을지 알아보자
+
+예를 들면 고교 중퇴율이 높은 주는 과연 평균 SAT점수도 낮을까???
 
 ```{r}
 library(lattice)
+
 parallelplot(education)
-parallelplot(education,horizontal.axis = FALSE)  #취향따라...
+
+parallelplot(education,
+             horizontal.axis = FALSE)  #취향따라...
 ```
 
 state열은 빼고, 검은색으로 바꿔보자
 
 ```{r}
-parallelplot(education[,2:7],horizontal.axis = FALSE, col="#000000")
+parallelplot(education[,2:7],
+             horizontal.axis = FALSE, 
+             col = "#000000")
 ```
 
 읽기,수학,쓰기는 평행에 가깝다
@@ -455,65 +847,102 @@ summary(education) #reading의 중앙값은 523이다
 ```{r}
 reading_colors = c()
 for (i in 1:length(education$state)){
-  if (education$reading[i]>523){
+  if (education$reading[i] > 523){
       col = "#000000"
   } else {
       col = "#cccccc"
   }
   reading_colors = c(reading_colors, col)
 }
-parallelplot(education[,2:7],horizontal.axis = FALSE, col=reading_colors)
+
+parallelplot(education[,2:7],
+             horizontal.axis = FALSE, 
+             col = reading_colors)
 ```
 
-중퇴율에 대해서도 살펴보자
+중퇴율의 경우에는 어떨까
 
 중앙값 대신 첫 4분위수(상위25%)로 필터링 : 여기서는 5.3%
 
 ```{r}
-dropout_colors=c()
+dropout_colors = c()
 for (i in 1:length(education$state)){
-  if (education$dropout_rate[i]>5.3){
+  if (education$dropout_rate[i] > 5.3){
     col = "#000000"
   } else {
     col = "#cccccc"
   }
   dropout_colors = c(dropout_colors, col)
 }
-parallelplot(education[,2:7],horizontal.axis = FALSE, col=dropout_colors)
+parallelplot(education[,2:7],
+             horizontal.axis = FALSE, 
+             col = dropout_colors)
 ```
 
-불분명해보임
+......별 의미는 없어보인다
+
+---------------------------
 
 #다차원척도법(MDS)
+
+이건 수학적인 설명을 못하겠다
+
+모든 변수를 비교해서 비교하기 가장 좋은 조건을 찾아 2차원에 투영한다고 생각하면 될 것 같다
+
+
 ```{r}
-education = read.csv("http://datasets.flowingdata.com/education.csv",header=T) #다시
+education = read.csv("http://datasets.flowingdata.com/education.csv",
+                     header = T) #다시
 ```
 
 ```{r}
 ed.dis = dist(education[,2:7]) #모든 주에 대해서 그 주와 나머지 모든 주 사이의 거리를 구한다, 첫열은 주이름이니 제외
 #행렬의 한 위치는 행의 주와 열의 주가 얼마만큼의 (유클리드)거리 로 떨어져 있어야 하는지를 보여줌
+
 ed.dis = cmdscale(ed.dis) #cmdscale함수는 거리 행렬을 입력으로 받아서 각 점을 입력된 거리에 맞게 배치한 좌표를 반환한다
-x=ed.dis[,1] #구한 좌표를 변수에 각각 저장
-y=ed.dis[,2]
+
+x = ed.dis[,1] #구한 좌표를 변수에 각각 저장
+y = ed.dis[,2]
+
 plot(x,y)
 ```
 
 한 점이 어떤주를 나타내는지 알 수 없으니 라벨을 붙여보자
 ```{r}
-plot(x,y,type="n")
-text(x,y,labels = education$state)
+plot(x,y,
+     type = "n") # 이러면 아무것도 안나온다
+
+text(x,y,
+     labels = education$state)
 ```
 
 주 라벨에 dropout_colors를 적용해보자
 ```{r}
-plot(x,y,type="n")
-text(x,y,labels = education$state,col=dropout_colors)
+plot(x,y,
+     type = "n")
+text(x,y,
+     labels = education$state,
+     col = dropout_colors)
 ```
 
-별로 의미없어보임
+별로 의미없어 보인다
 
 ```{r}
-plot(x,y,type="n")
-text(x,y,labels = education$state,col=reading_colors)
+plot(x,y,
+     type = "n")
+text(x,y,
+     labels = education$state,
+     col = reading_colors)
 ```
+
 오...............
+
+----------------------
+
+일단 오늘은 여기까지하고
+
+원래 이거 스터디 진행할때는 이거 다음에 바로 지도를 그렸던 것 같은데
+
+일단 자료를 더 모아야 할 것같아서 바로 `ggplot2` 로 넘어갈 것 같다
+
+근데 `ggplot2`는 1.0 버전업 이후에 바뀐게 많아서 이것도 고칠게 많을거같음 ㅠㅠ
