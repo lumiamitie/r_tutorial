@@ -615,21 +615,12 @@ tvs=tvs[tvs$size >10,]
 breaks = seq(10, 80, by=5)
 ```
 
-레이아웃을 설정한다
+레이아웃을 설정하고 차트를 그린다
 
 4,2 니깐 4행에 2열 짜리
 
 ```{r}
 par(mfrow=c(4,2))
-```
-
-##히스토그램 그리기
-
-이 글을 작성하고 있는 knitr에서는 par가 안먹히는 것 같다
-
-실제로 R에서 작성해보면 4,2 사이즈로 배치될 것이다
-
-```{r, eval=FALSE}
 hist(tvs[tvs$year == 2009,]$size, breaks=breaks)
 hist(tvs[tvs$year == 2008,]$size, breaks=breaks)
 hist(tvs[tvs$year == 2007,]$size, breaks=breaks)
