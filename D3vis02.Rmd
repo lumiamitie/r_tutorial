@@ -1,0 +1,518 @@
+---
+title: "D3vis02"
+author: "Mino"
+date: "Saturday, January 24, 2015"
+output:
+  html_document:
+    highlight: tango
+---
+
+# 저번주 내용에서 시작
+
+```javascript
+  var svg = d3.select("body")
+				.append("svg")
+				.attr("width",400)
+				.attr("height",400);
+	var data = [40, 100, 80, 140, 60, 70];
+	
+	svg.selectAll("rect")
+		.data(data)
+		.enter()
+		.append("rect")
+		.attr("x",10)
+		.attr("y", function(d, i){return i * (20 + 1) })
+		.attr("width",function(d){return d})
+		.attr("height", 20)
+		.attr("fill", "steelblue");
+```
+
+# X축의 범위를 지정해주자
+
+Domain과 Range라는 개념이 나오는데 수학시간에 배운 정의역과 공역(치역)이다
+
+domain에는 실제 데이터들의 범위를
+
+range에는 화면에 뿌려지는 구간의 범위를(px단위로) 넣어주면
+
+해당하는 값으로 변환해주는 함수가 생성된다
+
+```javascript
+	var svg = d3.select("body")
+				.append("svg")
+				.attr("width",400)
+				.attr("height",400);
+	var data = [40, 100, 80, 140, 60, 70];
+	
+	var x = d3.scale.linear()
+			.domain([0,200])
+			.range([10, 300]);
+			
+	var rect = svg.selectAll("rect")
+			.data(data)
+			.enter()
+			.append("rect")
+			.attr("x",10)
+			.attr("y", function(d, i){return i * (20 + 1) })
+			.attr("width",function(d){return x(d)})
+			.attr("height", 20)
+			.attr("fill", "steelblue");
+```
+
+x라는 scale 함수를 생성해서 domain과 range를 정해주었다
+
+.attr("width",function(d){return x(d)}) 을 보면
+
+return해주는 값이 d 에서 x(d)로 바뀐것을 볼 수 있다
+
+결과물이 어떻게 변하는지 확인하자
+
+또 range값에 변화를 주었을 때 어떻게 변하는지 확인해보자
+
+------------------
+
+# X축 그리기
+
+작성했던 코드 뒤에
+
+```javascript
+  var xAxis = d3.svg.axis()
+			.scale(x)
+			.orient("bottom");
+```
+
+를 추가해보자
+
+scale()안에는 위에서 생성했던 스케일 함수 x를 넣었다
+
+orient()는 축을 기준으로 눈금이 어느 방향에 들어갈지를 나타낸다
+
+그리고 그 뒤에
+
+```javascript
+	svg.append("g")
+	  .attr("class", "x axis")
+	  .attr("transform", "translate(0,130)")
+	  .call(xAxis);
+```
+
+를 추가하면 x축이 형성된다
+
+가운데의 .attr("transform", "translate(0,130)")가 없으면
+
+(0,0)을 기준으로 해서 화면 맨 위에 축이 그려진다
+
+그러니 일단 막대 가장 밑부분을 130정도로 보고
+
+x축으로 0, y축으로는 (아래로)130 만큼 이동시켜준다
+
+그런 다음에 아까 만들어둔 xAxis 함수를 호출했다
+
+그런데 선이 너무 두껍다
+
+선의 두께를 조정해보자
+
+```javascript
+  var xAxis = d3.svg.axis()
+			.scale(x)
+			.orient("bottom")
+			.ticks(5)
+			.outerTickSize(0)
+			.tickPadding(-5);
+```
+
+outerTickSize 옵션을 조정하면 선 두께를 조정할 수 있다
+
+막대를 보는데 방해가 되니 두께를 0으로 줘서 아예 없애버린다
+
+tickPadding 옵션은 축과 눈금의 거리를 나타낸다
+
+축을 안보이게 가리는 바람에 막대와 눈금이 멀어졌으니
+
+-5정도를 줘서 가깝게 붙여줄 수 있다
+
+눈금도 너무 많은 것 같으니
+
+ticks 옵션을 통해 5개만 나오도록 조정해버리자
+
+
+좀 쌩뚱맞긴한데 갑자기 마우스오버 이벤트를 넣고싶어졌다
+
+막대기에 마우스를 올리면 색이 바뀌게 만들자
+
+`<head>`와 `</head>`사이에
+
+```html
+  <style>
+		rect:hover {
+			fill: maroon;
+		}
+	</style>
+```
+
+를 넣어준다. 이미 style 항목이 있으면 내용만 추가하면된다
+
+데이터의 수치를 확인할 필요도 있을 것 같으니
+
+막대기 끝에다가 값을 써주기로 하자
+```javascript
+var label = svg.selectAll(".label")
+		.data(data)
+		.enter()
+		.append("text")
+		.attr("x", function(d, i){return x(d)})
+		.attr("y", function(d, i){return i * (20 + 1)+16})
+		.attr("text-anchor","end")
+		.text(function(d){return d})
+		.style("fill", "white");
+```
+
+svg 변수에 이어서 작성하도록 하자
+
+data를 연결해서 text항목을 append하고
+
+x는 아까 막대와 동일하게 x(d)를
+
+y에는 아까 값에다가 16을 더해준다
+
+도형은 시작점에서 아래방향으로 커지는데
+
+텍스트는 시작점에서 위로 올라간다 그래서 16px 더 밑으로 내려버림
+
+text-anchor는 end 이면 시작점에서 끝나고 start면 시작점에서 시작
+
+middle이면 중앙으로 온다 궁금하면 직접 바꿔서 확인
+
+text에 들어가는 항목은 직접 넣어주면 되니깐 d를 그대로 넣어주고
+
+글씨 색은 흰색으로 해보자
+
+-------
+
+# 완성코드
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>D3 first tutorial</title>
+    <script type="text/javascript" src="d3.min.js"></script>
+	<style>
+		rect:hover {
+			fill: maroon;
+		}
+		svg {
+			font-family: Malgun Gothic;
+		}
+	</style>
+  </head>
+  <body>
+	<script>
+		var svg = d3.select("body")
+					.append("svg")
+					.attr("width",400)
+					.attr("height",400);
+		var data = [40, 100, 80, 140, 60, 70];
+		
+		var x = d3.scale.linear()
+				.domain([0,200])
+				.range([10, 300]);
+				
+		var rect = svg.selectAll("rect")
+					.data(data)
+					.enter()
+					.append("rect")
+					.attr("x",10)
+					.attr("y", function(d, i){return i * (20 + 1) })
+					.attr("width",function(d){return x(d)})
+					.attr("height", 20)
+					.attr("fill", "steelblue");
+			
+		var xAxis = d3.svg.axis()
+				.scale(x)
+				.orient("bottom")
+				.ticks(5)
+				.outerTickSize(0)
+				.tickPadding(-5)
+				;
+				
+		svg.append("g")
+		  .attr("class", "x axis")
+		  .attr("transform", "translate(0,130)")
+		  .call(xAxis);
+		
+		var label = svg.selectAll(".label")
+			.data(data)
+			.enter()
+			.append("text")
+			.attr("x", function(d, i){return x(d)})
+			.attr("y", function(d, i){return i * (20 + 1)+16})
+			.attr("text-anchor","end")
+			.text(function(d){return d})
+			.style("fill", "white");
+	</script>
+  </body>
+</html>
+```
+
+# 그러면 이제 세로로 올라가는 막대그래프를 만들어보자
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>D3 first tutorial</title>
+    <script type="text/javascript" src="d3.min.js"></script>
+	<style>
+	</style>
+  </head>
+  <body>
+	<script>
+		var svg = d3.select("body")
+				.append("svg")
+				.attr("width",700)
+				.attr("height",400);
+	</script>
+  </body>
+</html>
+```
+
+여기서부터 새로 시작
+
+아까는 데이터에 숫자만 넣었는데 이번에는 어느정도 형식을 갖춘 데이터를 넣자
+
+```javascript
+var data = [{"name":"민호", "count":100},
+				{"name":"유경", "count":200},
+				{"name":"태훈", "count":130},
+				{"name":"수빈", "count":110},
+				{"name":"은별", "count":180},
+				{"name":"기랑", "count":190}];
+```
+
+x축은 명목형 변수인 이름으로 하고 y축은 count로 막대를 쌓아보자
+
+먼저 y축이 아까 한거랑 비슷하니까
+
+```javascript
+var y = d3.scale.linear()
+				.domain([0, 200])
+				.range([10,350])
+```				
+
+근데 만약에 새로 들어가는 데이터가 count > 200 이라면
+
+막대가 제대로 표시되지 않을 것이다
+
+그렇다면 data에서 count의 최대값을 구해보도록 하자
+
+콘솔에서
+
+`console.table(data)`
+
+로 데이터를 살펴보자
+
+map함수를 이용하면 하나의 열 전체에 대해 적용이 가능하다
+
+다음 문장들을 console에서 쳐보자
+
+```javascript
+data.map(function(d){return d.count})
+data.map(function(d){return d.name})
+```
+
+최대값을 구하는 함수는 d3.max() 이다
+
+최소값은 `d3.min()`
+`d3.extent()`를 사용하면 최대와 최소를 array로 반환해준다
+하지만 우리는 0부터 시작할거니깐 최대만 필요하다
+`d3.max(data.map(function(d){return d.count}))`
+
+최대값을 구했으니 y 스케일함수의 domain에 반영해보자
+
+```javascript
+  var y = d3.scale.linear()
+				.domain([0,d3.max(data.map(function(d){return d.count}))])
+				.range([10,350])
+```			
+다음은 명목형 변수 x에 대한 스케일 함수를 구해보자
+
+```javascript
+	var x = d3.scale.ordinal()
+				.domain()
+				.rangeRoundBands()
+```
+
+가 기본적인 구조이다
+
+domain에는 명목형 자료들이 들어가야 하니
+
+아까 구해본 이름 목록을 넣어주고 range 범위를 적어주자
+
+```javascript
+var x = d3.scale.ordinal()
+				.domain(data.map(function(d){return d.name}))
+				.rangeRoundBands([10, 350])
+```
+
+그러면 이제 막대기를 그려보자
+
+```javascript
+var rect = svg.selectAll("rect")
+					.data(data)
+					.enter()
+					.append("rect")
+					.attr("x", function(d){return x(d.name);})
+					.attr("y", 10)
+					.attr("width", x.rangeBand())
+					.attr("height", function(d){return y(d.count)})
+```
+
+스케일 함수 x와 y를 각각 이름과 count에 적용해서 "x"와 "height"에 줬다
+
+y의 경우는 10을 줬기때문에 지금은 위에서 아래로 떨어지는 막대가된다
+
+`x.rangeBand()`는 우리가 지정해준 x의 range를
+
+변수목록만큼 적당히 나눠준 너비값이다
+
+막대가 너무 붙어있으니 저기다가 1,2정도 빼주면 될 것 같다
+
+그러면 우리가 익숙한 아래에서 위로 올라오는 막대는 어떻게 만들까?
+
+y + height가 일정하면 될거다
+
+y + height = 350이라고 둔다면
+
+y를 350- height로 놓으면 될듯
+
+하는김에 색도 넣어주자
+	
+```javascript
+  var rect = svg.selectAll("rect")
+					.data(data)
+					.enter()
+					.append("rect")
+					.attr("x", function(d){return x(d.name);})
+					.attr("y", function(d){return 350 - y(d.count)})
+					.attr("width", x.rangeBand()-2)
+					.attr("height", function(d){return y(d.count)})
+					.style("fill", "steelblue");
+```
+
+이제는 축을 그려보자
+
+아까 했던 것처럼
+
+axis 함수를 작성하고 축 그룹을 만든다음에 axis함수를 호출한다
+
+```javascript
+	var xAxis = d3.svg.axis()
+					.scale(x)
+					.outerTickSize(0)
+					.orient("bottom");
+					
+	var yAxis = d3.svg.axis()
+					.scale(y)
+					.orient("right");
+
+	svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0,350)")
+		.call(xAxis);
+	
+	svg.append("g")
+		.attr("class", "y axis")
+		.attr("transform", "translate(350,0)")
+		.call(yAxis);
+```
+
+해보면 뭔가 이상하다
+
+y축의 숫자가 뒤바뀐거같다
+
+```javascript
+var y = d3.scale.linear()
+				.domain([d3.max(data.map(function(d){return d.count})),0])
+				.range([10,350])
+				
+	var rect = svg.selectAll("rect")
+					.data(data)
+					.enter()
+					.append("rect")
+					.attr("x", function(d){return x(d.name);})
+					.attr("y", function(d){return y(d.count)})
+					.attr("width", x.rangeBand()-2)
+					.attr("height", function(d){return 350 - y(d.count)})
+					.style("fill", "steelblue");
+```
+
+그래서 y.domain의 순서를 max, 0으로 변경하자
+
+y+height이 350이 나와야 한다는것은 동일하니깐
+
+"y"와 "height"의 return값만 조금 바꿔주면 된다
+
+```javascript
+		var yAxis = d3.svg.axis()
+						.scale(y)
+						.outerTickSize(0)
+						.ticks(5)
+						.innerTickSize(-350)
+						.orient("right");
+```
+
+y축을 조금 수정해보자
+
+눈금은 5개만 보이게 하고 선은 아예 안보이게 막았다
+
+innerTickSize는 뭘까??
+
+반영을 해봐도 보이지는 않는데
+
+Element에서 확인을 해보면 보이지는 않지만 뭔가 있다
+
+CSS(`<style></style>`내부)에
+
+```css
+.tick line{
+			stroke: #ccc;
+		}
+```
+
+를 추가해보자
+
+선이 나타났다
+
+`#ccc`는 색이름이니깐 원하는 색으로 바꿔도 된다
+
+```css
+.tick line{
+			stroke: blue;
+			opacity: 0.5
+		}
+```
+이런 식으로 적당히 색주고 투명도를 줄 수 있다
+
+근데 선이 막대 위로 나오는게 마음에 안들수도 있다
+
+가장 쉬운 방법은
+
+축을 먼저 만들고 막대기를 나중에 만들기
+
+var rect부분이 맨 뒤에 나오면 된다
+
+마지막으로 var rect에서 맨 마지막 막대색깔부분을 지워보자
+
+그리고 CSS에
+
+```css
+rect {
+			fill: steelblue;
+		}
+		rect:hover{
+			fill:maroon;
+		}
+```
+
+을 넣어주면 아까처럼 마우스에 반응한다 ㅋ_ㅋ
