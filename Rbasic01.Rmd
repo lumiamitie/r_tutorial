@@ -1,0 +1,131 @@
+---
+title: "Rbasic 01"
+author: "Mino"
+date: "Thursday, February 05, 2015"
+output:
+  html_document:
+    highlight: tango
+---
+
+## DATA ???
+![](data_sketch.png)
+
+## R 내장 데이터 확인해보기
+```{r, eval = FALSE}
+data()
+```
+
+`?iris` 처럼 데이터 앞에 `?`를 붙여보면 데이터에 대한 설명을 볼 수 있다.
+
+패키지를 만드는 경우 패키지에 가장 적합한 데이터를 샘플로 넣어두는 경우가 많다
+
+
+## 수치형 자료
+
+- 연속형 자료
+
+```{r}
+Formaldehyde
+```
+
+`plot` 함수는 데이터에 가장 적합한 형태의 그래프를 그려준다
+
+```{r}
+plot(Formaldehyde)
+```
+
+`type`을 지정해서 그래프의 형태를 강제할 수 있다.
+
+```{r}
+plot(Formaldehyde, type = "l")
+```
+
+`cars` 데이터는 자동차의 속도와 제동거리 간의 관계를 보여준다
+
+```{r}
+cars
+```
+
+`plot`을 사용해보자
+
+```{r}
+plot(cars)
+```
+
+```{r}
+plot(cars, type= "b")
+```
+
+## 이산형 자료
+
+`mtcars`는 *1974 Motor Trend US Megazine*에 수록된 차량과 차량에 관련된 수치들이 기록된 자료이다.
+
+```{r}
+mtcars
+plot(mtcars)
+```
+
+변수명|변수설명
+------|-----------------------------
+mpg   |연비 (Miles per Gallon)
+cyl   |실린더 개수
+disp  |배기량
+hp    |마력
+drat  |후방차축 비율
+wt    |무게
+qsec  |1/4 마일에 도달하는데 걸린 시간
+vs    |엔진 (0 : V engine 1 : Straight engine)
+am    |변속기 (0 : 자동, 1 : 수동)
+gear  |기어 개수?
+carb  |기화기(카뷰레터) 개수
+
+`plot`으로 그린 그래프를 보면 `cyl`, `vs`, `am`, `gear`, `carb` 변수의 경우에는 일정한 구간으로 점이 찍힌 것을 볼 수 있다.
+
+그 중에서도 개수를 나타내는 `cyl`, `gear`, `carb` 변수의 경우 이산형 변수이다
+
+`vs`와 `am` 변수는 범주형 자료를 임의로 수치화 시킨 `dummy variable`이다.
+
+## 범주형 자료
+```{r}
+plot(InsectSprays)
+```
+
+y축이 범주형 자료 (spray의 종류)이다.
+
+y축과 x축을 바꾸고 boxplot을 출력해보자
+
+```{r}
+boxplot(count ~ spray, data = InsectSprays, col = "lightgray")
+```
+
+R에서는 일반적으로 `plot(x, y)` 형태의 경우 앞에 있는 변수부터 x축, y축이고
+
+`plot(y ~ x)` 형태인 경우 순서가 바뀌게 된다
+
+`~`를 사용하는 경우 `~` 앞의 변수가 **종속변수**, `~` 뒤의 변수가 **독립변수**다.
+
+## 범주형 자료 - contingency table
+```{r}
+Titanic
+plot(Titanic)
+```
+
+contingency table의 경우 `plot`함수를 적용하면 기본적으로 *Mosaic Plot* 을 출력한다
+
+
+## 범주형 자료 - 순서형 자료
+
+예제는 안구했는데 보통 설문지에서
+
+1. 매우 좋다
+
+2. 좋다
+
+3. 그저 그렇다
+
+4. 나쁘다
+
+5. 매우 나쁘다
+
+이런 항목이 대표적인 순서형 자료이다.
+
