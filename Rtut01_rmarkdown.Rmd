@@ -1,0 +1,155 @@
+---
+title: 'Rturorial 01 : RMarkdown'
+author: "Mino"
+date: "Friday, February 06, 2015"
+output: html_document
+---
+
+## Hello RMarkdown
+
+RStudio를 실행시키고 `File - New file - RMarkdown`을 실행시켜주자
+
+그러면 다음과 같은 예제 파일이 생성된다.
+
+![](images/rtut01_03.jpg)
+
+
+화면이 나왔으면 아래 그림에서 보이는 `knit HTML` 버튼을 눌러주자
+
+![](images/rtut01_01.jpg)
+
+그러면 아래 화면과 같은 창이 뜰 것이다
+
+![](images/rtut01_02.jpg)
+
+
+## RMarkdown Basic
+
+**텍스트**는 그냥 쓰면 된다. 
+
+한 줄을 띄고 싶으면 Enter를 두번 눌러서 줄과 줄 사이에 빈 줄이 있어서 줄바꿈으로 인식된다는 것에 주의하자
+
+예를 들어
+
+```
+Enter를 한 번만 눌렀다
+Enter를 한 번만 눌렀다
+
+Enter를 두 번 눌렀다
+
+Enter를 두 번 눌렀다
+```
+이 경우 결과물은 아래와 같다
+
+Enter를 한 번만 눌렀다
+Enter를 한 번만 눌렀다
+
+Enter를 두 번 눌렀다
+
+Enter를 두 번 눌렀다
+
+---------------------
+
+**링크**의 경우 `<http://www.주소.com>`의 형식으로 바로 적용 가능하다
+
+`http://`가 있어야만 링크로 인정된다
+
+`<http://www.naver.com>` <http://www.naver.com>
+
+만약 텍스트에 하이퍼링크를 걸고 싶다면
+
+`[linked text](http://www.주소.com)` 의 형태로 적어주면 된다
+
+[네이버로 가보자](http://www.naver.com)
+
+--------------------
+
+**그림파일**을 첨부하는 것도 링크와 비슷한데
+
+`![](로컬 또는 웹상의 그림주소)` 의 형태로 넣어주면 된다
+
+html이든 뭐든 그림파일을 아예 저장해버리기 때문에 knit 이후에 그림파일에 대해서는 신경안써도 된다.
+
+위에서 불러왔던 그림파일의 경우
+
+`![](images/rtut01_01.jpg)` 를 사용해서 넣어놨다.
+
+![](images/rtut01_01.jpg)
+
+프로젝트 폴더 내부에 있는 `images`폴더 안에 그림파일들이 있다.
+
+---------------------
+
+**강조하기** , *강조하기*
+
+단어를 `**이렇게**` 하면 **이렇게** 굵게 처리된다.
+
+그리고 `*이렇게*` 하면 *이렇게* 기울어진다
+
+----------------------
+
+**R코드** 를 문서에 바로 반영해보자
+
+```{r, results='asis', echo=FALSE}
+cat("```{r} \n\n")
+cat("R code \n\n")
+cat("```")
+```
+
+의 형태로 적어주면 코드가 실행된다
+
+`plot(iris)`를 안에 적어보자
+
+```{r, results='asis', echo=FALSE}
+cat("```{r} \n\n")
+cat("plot(iris) \n\n")
+cat("```")
+```
+
+```{r}
+plot(iris)
+```
+
+```{r, results='asis', echo=FALSE}
+cat("```{r, echo = FALSE} \n\n")
+cat("plot(iris) \n\n")
+cat("```")
+```
+
+`echo = FALSE` 옵션의 경우 R 코드를 숨기고 결과문만을 보여준다
+
+`plot`의 결과인 차트만 출력하고 싶을 때 사용하면 된다
+
+```{r, echo = FALSE}
+plot(iris)
+```
+
+```{r, results='asis', echo=FALSE}
+cat("```{r, eval = FALSE} \n\n")
+cat("plot(iris) \n\n")
+cat("```")
+```
+
+`eval = FALSE` 옵션은 R 코드만을 보이고 계산을 하지 않는다
+
+```{r, eval = FALSE}
+plot(iris)
+```
+
+문장을 쓰다가 중간에 R연산의 결과를 넣어야 할 경우도 있을 것이다.
+
+```{r, echo = FALSE, }
+cat("`r R코드` 를 통해 한 줄에서 R 연산을 수행하는 것도 가능하다")
+```
+
+```{r, echo = FALSE, }
+cat("`r rnorm(1)`")
+```
+
+결과는 `r rnorm(1)`
+
+---------------------------
+
+자세한 내용은 <http://rmarkdown.rstudio.com/>에서 확인할 수 있다
+
+`Rmarkdown Cheat Sheet`나 `Reference Guide`를 참고하면 다른 여러가지 옵션들도 알아볼 수 있다.
