@@ -130,6 +130,8 @@ read.csv(
 "https://raw.githubusercontent.com/lumiamitie/lumiamitie.github.io/master/data/streetlamp.csv",
 header = T,
 fileEncoding = "UTF-8")
+# 안되면 lumiamitie.github.io/data/streetlamp.csv 에서 파일 다운로드
+# 맥, 리눅스 유저분들은 fileEncoding 옵션 없어도 될거에요
 ```
 
 - **reshape2**, **dplyr** 패키지 설치
