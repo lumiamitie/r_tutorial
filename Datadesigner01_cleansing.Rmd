@@ -1,0 +1,421 @@
+---
+title: "Data Cleansing"
+author: "Mino"
+date: "Wednesday, February 11, 2015"
+output:
+  ioslides_presentation:
+    css: font.css
+    highlight: tango
+    logo: C:/Users/Administrator/Pictures/datadesigner0.png
+    widescreen: yes
+---
+
+## 데이터를 구했을 때 생길 수 있는 상황
+
+- 원하는 형태의 데이터가 아니다
+<br><br>
+
+- 값이 없는 것도 있다
+<br><br>
+
+- 데이터의 내용을 수정하고 싶다
+<br><br>
+
+- 자료를 합치고 싶다
+<br><br>
+
+- 중복된 내용을 제거하고 싶다
+<br><br>
+
+- 기타 등등..
+
+## 데이터 전처리
+
+<br>
+
+- 데이터를 특정 분석 목적에 맞게 분석 가능한 상태로 만드는 것
+
+<br>
+
+- **단정한 데이터** 를 만들자!!
+
+## Tidy Data??
+<div class = "columns-2 centered">
+<br>
+ <h3>wide format</h3>
+
+<br>
+
+```{r, echo = FALSE}
+library(gcookbook)
+simpledat
+```
+
+<br>
+<br>
+
+<br>
+ <h3>long format</h3>
+
+<br>
+```{r, echo = FALSE}
+simpledat_long
+```
+</div>
+
+## Tidy Data
+
+<br>
+
+- 각 변수는 각각의 열에 속한다
+
+<br>
+
+- 각 관측치는 행을 구성한다
+
+<br>
+
+- 각 테이블은 단 하나의 관측기준에 따라 조직된 데이터를 저장한다
+
+## Tidy Data를 사용해야하는 이유??
+
+<br>
+
+- 다양한 데이터 포맷으로 쉽게 바꿀 수 있다
+
+<br>
+
+- 모델링과 시각화가 편하다
+
+## 서울시 중구 가로등 현황 자료
+
+<div class = "columns-2">
+<img src ="images/datacleansing01_01.jpg", width = 450, height = 500>
+
+<br>
+<br>
+
+- 연도별로 세분화한 열을 제공하기 <br>때문에 **tidy data가 아니다**
+
+<br>
+
+- row수를 줄여 한정된 페이지 공간에서 자료를 보여줄 수 있다
+
+</div>
+
+## 서울시 중구 가로등 현황 자료
+
+<div class = "columns-2">
+<img src ="images/datacleansing01_01.jpg", width = 450, height = 500>
+
+<br><br><br><br><br><br>
+
+**Tidy data로 만들고 데이터를 다뤄보자**
+
+</div>
+
+## 자료 가져오기 + 패키지 설치하기 {.smaller}
+
+```{r, echo = FALSE}
+streetlamp <- 
+  read.csv("streetlamp.csv",
+  header = T)
+```
+
+- 자료 불러오기
+
+```{r, eval = FALSE}
+streetlamp <- 
+read.csv(
+"https://raw.githubusercontent.com/lumiamitie/lumiamitie.github.io/master/data/streetlamp.csv",
+header = T,
+fileEncoding = "UTF-8")
+```
+
+- **reshape2**, **dplyr** 패키지 설치
+
+```{r, message=FALSE}
+# install.packages(reshape2)
+
+library(reshape2)
+
+# install.packages(dplyr)
+
+library(dplyr)
+```
+
+## 패키지 설명
+
+<div class = "columns-2">
+
+<h3>reshape2</h3>
+
+- **wide format <-> long format**
+
+- melt : wide format -> long format
+
+- cast : long format -> wide format
+
+<br><br><br>
+
+<h3>dplyr</h3>
+
+- **A Grammar of Data Manipulation**
+
+- select
+
+- filter
+
+- mutate
+
+- summarise
+
+- arrange
+
+</div>
+
+## reshape2::melt
+
+- 패키지이름::함수명 입니다
+
+- melt는 피벗테이블 처럼 생긴 자료를 *id*, *variable*, *value* 형태로 반환해준다
+
+- *melt(데이터, value.name = "value변수이름")*
+
+```{r, message=FALSE}
+tidy_streetlamp <- melt(streetlamp, value.name = "count")
+```
+```{r}
+head(tidy_streetlamp)
+```
+
+## base::names
+
+- names()는 각 열의 이름들을 반환해준다
+
+- *names(데이터프레임) = c(열 이름 목록)* 을 통해 원하는 이름으로 변경할 수 있다
+
+```{r}
+names(tidy_streetlamp) = c("location", "year", "count")
+
+head(tidy_streetlamp)
+```
+
+## base::gsub
+
+- gsub()은 특정 문자열/패턴을 찾아서 원하는 문자열로 변환시킨다
+
+- 정규표현식을 사용할 수 있으니 궁금하면 **?regex** 로 검색해봐요
+
+- *gsub("찾을단어", "바꿀단어", "데이터")*
+
+```{r}
+tidy_streetlamp$year <- gsub("X|년", "", tidy_streetlamp$year)
+
+head(tidy_streetlamp)
+```
+
+## dplyr::mutate
+
+- mutate() 함수는 열을 추가할 수 있다
+
+- 새로 생성한 열도 같은 함수 내에서 바로 사용할 수 있다
+
+- *mutate(데이터, 추가할 열 = 연산내용)*
+
+```{r, message=FALSE}
+dplyr_streetlamp <- melt(streetlamp, value.name = "count")
+```
+```{r}
+dplyr_streetlamp <- mutate(dplyr_streetlamp, year = gsub("X|년","",variable))
+head(dplyr_streetlamp)
+```
+
+## dplyr::select
+
+- select()는 특정 열을 추출한다
+
+- *select(데이터, 추출할열이름, -제외할열이름)*
+
+```{r}
+dplyr_streetlamp <- select(dplyr_streetlamp, location = X, year, count)
+head(dplyr_streetlamp)
+```
+
+## dplyr::filter
+
+- filter()는 조건에 따라 행을 추출한다
+
+- **&**(AND) 연산자를 이용하거나 **,** 로 구분하여 여러가지 조건을 줄 수 있다
+
+- **|**(OR) 연산자를 이용해 조건을 줄 수 있다. (원화표시 또는 역슬래시 위에 있는 키)
+
+- *filter(데이터, 조건)*
+
+```{r}
+filter(dplyr_streetlamp, year == 2011, count > 500)
+```
+
+## dplyr::group_by
+
+- 열의 항목별로 그룹화된 결과를 얻을 수 있다
+
+- *group_by(데이터, 변수명)*
+
+```{r}
+year_streetlamp <- group_by(dplyr_streetlamp, year)
+head(year_streetlamp)
+```
+
+## dplyr::summarise
+
+- **summary function**을 적용하여 그룹별로 결과를 볼 수 있다
+
+- summary function : 벡터를 입력받아서 단일 값을 반환하는 함수
+
+- mean() : 평균, var() : 분산, n() : 개수 등
+
+```{r}
+summarise(year_streetlamp, mean(count))
+```
+
+## group_by + mutate {.smaller}
+
+- 그룹화 시킨 결과물에 mutate를 적용시키면 해당 값을 가지는 열을 새로 만든다
+
+<div class = "columns-2">
+
+```{r}
+mutate(year_streetlamp, mean(count))
+```
+
+<br>
+
+```{r}
+mutate(year_streetlamp, 
+       mean = mean(count), 
+       diff = count - mean)
+```
+
+</div>
+
+## 동별로 평균을 계산해보자
+
+```{r}
+location_streetlamp <- group_by(dplyr_streetlamp, location)
+summarise(location_streetlamp, mean(count))
+```
+
+## 가로등이 동별 평균보다 적은 곳
+```{r}
+filter(mutate(location_streetlamp, 
+         mean = mean(count), 
+         diff = count - mean), diff < 0)
+```
+
+## 동별로 가로등 수가 평균보다 적었던 횟수
+
+```{r}
+count_minus <- summarise(filter(mutate(location_streetlamp, 
+                         mean = mean(count), 
+                         diff = count - mean),diff < 0),count = n())
+head(count_minus)
+```
+
+## dplyr::arrange
+
+- arrange()는 특정 변수를 기준으로 오름차순 정렬한다
+
+- 두 개 이상의 변수를 기준으로 할 수 있다
+
+- 내림차순 정렬의 경우 desc(변수명)을 넣어주면 된다
+
+<div class = "columns-2">
+```{r}
+arrange(count_minus, desc(count))
+```
+
+<br>
+
+```{r}
+arrange(count_minus, count)
+```
+</div>
+
+## Pipe Operator %>%
+
+<br>
+
+- 이전 문장의 결과물을 다음 문장의 첫번째 인자로 투입
+
+<br>
+
+- **function(X1, X2, X3)** 는 <br>**X1 %>% function(X2, X3)**와 같다
+
+<br>
+
+- RStudio Keyboard Shortcut : **ctrl + shift + m** (맥은 **cmd + shift + m** )
+
+<br>
+
+- 임시 데이터 없이 자료를 정리하고, <br>생각하는 순서대로 코드를 작성하는데 도움을 준다
+
+## Pipe Operator 적용 전
+
+```{r, eval=FALSE}
+mutate(
+  group_by(
+    select(
+      mutate(
+        melt(streetlamp, value.name = "count"), 
+        year = gsub("X|년","",variable)), 
+      location = X, 
+      year, 
+      count), 
+    location), 
+  mean = round(mean(count), 2), 
+  diff = round(count - mean, 2))
+```
+
+## Pipe Operator 적용 후
+
+```{r, message=FALSE}
+pipe_result <- 
+  streetlamp %>%
+  melt(value.name = "count") %>%
+  mutate(year = gsub("X|년","",variable)) %>%
+  select(location = X, year, count) %>%
+  group_by(year) %>%
+  mutate(mean = round(mean(count),2), 
+         diff = round(count - mean, 2))
+```
+
+- streetlamp라는 변수를
+- melt() 시키는데 value 이름은 count로 바꿔주고
+- variable 항목에서 "X"랑 "년"을 빈칸으로 바꾼다음에 year라고 이름을 바꾸고
+- X로 location으로 이름을 바꿔서 location, year, count 변수만 보여주는데
+- location으로 그룹을 묶어서
+- 그룹별로 평균을 구하고 각 값에서 평균을 뺀 값을 diff라고 할게요..라는 의미
+
+## reshape2::dcast
+
+- 동 ~ 연도별 diff 데이터로 wide format 데이터 만들기
+
+- dcast() 는 long format을 wide format으로 변경시켜준다
+
+- *dcast(데이터, 세로축변수 ~ 가로축변수, value.var = "값으로 들어갈 변수")*
+
+```{r}
+diff_streetlamp <- dcast(pipe_result, location ~ year, value.var = "diff")
+head(diff_streetlamp)
+```
+
+## Vignette
+
+- dplyr패키지에서 각각의 함수에 대한 자세한 내용은 아래에서 찾아볼 수 있다
+
+```{r, eval=FALSE}
+vignette("introduction", package = "dplyr")
+```
+
+- reshape2 패키지에 대한 내용은 [여기로](http://seananderson.ca/2013/10/19/reshape.html)
