@@ -1,0 +1,237 @@
+---
+title: "Data Cleansing02"
+author: "Mino"
+date: "Saturday, February 14, 2015"
+output:
+  html_document:
+    css: font.css
+---
+
+## 날짜 다루기 
+```{r}
+time = Sys.time() # 현재시각
+
+weekdays(time)
+months(time)
+quarters(time)
+
+strftime(time,"%Y-%m-%d %H:%M:%S")
+strftime(time, "%m/%d")
+strftime(time, "%Y-%m-%d")
+strftime(time, "%Y")
+strftime(time, "%w") # 요일 : 일요일이 0일 때 0~6으로 표현
+```
+
+- `?strftime`으로 자세한 포맷 옵션을 확인
+
+---------------------------
+
+- `as.Date()` : 문자열 -> 날짜
+```{r}
+str_time = "20150214"
+date_time = as.Date(str_time, format = "%Y%m%d")
+date_time + 1
+date_time + 1:7
+
+weekdays(date_time)
+```
+
+---------------------------
+
+- `gcookbook` 패키지의 `aapl` 데이터를 가지고 활용해보자
+
+```{r}
+# install.packages("gcookbook")
+library(gcookbook)
+library(dplyr)
+head(aapl) # Weekly stock data for Apple, Inc. from 1984 to 2012
+str(aapl) # Date 형식
+```
+
+----------------------------
+
+### 요일, 월, 분기 구분하기
+```{r}
+aapl_date <- aapl %>%
+  mutate(weekday = weekdays(date),
+         month = months(date),
+         quarter = quarters(date))
+
+head(aapl_date)
+```
+
+---------------------------
+
+### 연도 구분하기
+
+```{r}
+aapl_date <- aapl_date %>%
+  mutate(year = strftime(date, "%Y"))
+
+head(aapl_date)
+```
+
+-----------------------------
+
+### 연도별 평균
+
+```{r}
+aapl_year <- aapl_date %>%
+  group_by(year) %>%
+  summarise(mean_price = mean(adj_price))
+
+head(aapl_year)
+```
+
+-----------------------------
+
+### 연도별 평균 가격에 대한 막대그래프
+
+```{r}
+barplot(aapl_year$mean_price, 
+        names.arg = aapl_year$year, 
+        border = NA)
+```
+
+-------------------------------
+
+### 분기별 평균
+
+```{r}
+aapl_qt <- aapl_date %>%
+  group_by(quarter) %>%
+  summarise(mean_price = mean(adj_price))
+
+head(aapl_qt)
+```
+
+--------------------------------
+
+## NA(결측치) 다루기
+
+ **NA : Not Available**, 일반적으로 결측치를 나타낸다
+
+`?NA`에서 자세한 내용을 볼 수 있다
+
+------------------------------
+
+**NA의 특성** : 연산을 해도 결과가 NA
+```{r}
+NA+1
+NA & TRUE
+```
+
+---------------------------------------------
+
+- 평균, 분산 등의 연산에서 NA 값이 포함되면 결과물도 NA로 나온다
+
+```{r}
+mean_na = c(1, 2, 3, NA, 5)
+mean_na
+mean(mean_na) # NA가 나온다
+sum(mean_na)
+var(mean_na)
+```
+
+- na.rm 옵션이 있는 경우 TRUE로 바꿔주면 NA를 제외하고 계산한다
+
+```{r}
+mean(mean_na, na.rm = TRUE)
+sum(mean_na, na.rm = TRUE)
+var(mean_na, na.rm = TRUE)
+```
+
+----------------------------
+
+- `is.na()`함수를 통해 NA여부를 판단할 수 있다
+
+```{r}
+is.na(mean_na)
+
+mean_narm <- mean_na
+mean_narm[is.na(mean_narm)] = 0
+mean_narm
+```
+
+---------------------------
+
+- iris 데이터를 활용해서 NA가 포함된 샘플을 만들어보자
+
+```{r}
+iris_na <- iris[1:5, ]
+iris_na[2,2] = NA
+iris_na[1,3] = NA
+iris_na
+```
+
+- `na.omit()` : NA가 포함된 행을 제외
+
+```{r}
+na.omit(iris_na)
+```
+
+- `complete.cases()` : NA가 없는 행은 TRUE, NA가 존재하면 FALSE로 행을 출력
+
+```{r}
+complete.cases(iris_na)
+iris_na %>%
+  filter(complete.cases(iris_na) == FALSE)
+```
+
+
+- `mutate`와 `ifelse`를 이용한 NA처리
+
+```{r}
+iris_na %>%
+  mutate(Sepal.Width_rm = ifelse(is.na(Sepal.Width)==TRUE, 0, Sepal.Width),
+         Petal.Length_rm = ifelse(is.na(Petal.Length)==TRUE, 0, Petal.Length))
+```
+
+-----------------------
+
+## JOIN
+
+- SQL의 JOIN과 비슷하다
+
+```{r}
+df1 <- data.frame(x = c(1, 2, 3), y = c(2, 1, 3))
+df2 <- data.frame(x = c(1, 3), a = 10, b = "a")
+```
+
+### base::merge
+
+- `merge(x, y)`
+
+```{r}
+merge(df1, df2)
+merge(df1, df2, by.x = "x", by.y = "x")
+```
+
+- `all.x` 옵션을 켜주면 왼쪽에 들어간 데이터 프레임은 모든 열이 반환된다
+
+- SQL의 `left join`과 비슷
+
+```{r}
+merge(df1, df2, by.x = "x", by.y = "x", all.x = TRUE)
+```
+
+
+### dplyr - join
+
+- `inner_join(x, y)` : x, y 양쪽 모두에 존재하는 행만 합친다
+
+```{r}
+df1 %>% inner_join(df2, by=("x"="x"))
+```
+
+- `left_join(x, y)` : x는 전부 다 놓고, y는 해당하는 행이 존재하면 합치고 없으면 NA
+
+```{r}
+df1 %>% left_join(df2, by=("x"="x"))
+```
+
+- anti_join(x, y) : x 중에서 y에 없는 항목만 부른다
+
+```{r}
+df1 %>% anti_join(df2, by=("x"="x"))
+```
