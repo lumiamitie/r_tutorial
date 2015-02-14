@@ -79,7 +79,7 @@ weekdays(time)</code></pre>
 <pre class="r"><code>quarters(time)</code></pre>
 <pre><code>## [1] &quot;Q1&quot;</code></pre>
 <pre class="r"><code>strftime(time,&quot;%Y-%m-%d %H:%M:%S&quot;)</code></pre>
-<pre><code>## [1] &quot;2015-02-14 12:52:52&quot;</code></pre>
+<pre><code>## [1] &quot;2015-02-14 13:17:01&quot;</code></pre>
 <pre class="r"><code>strftime(time, &quot;%m/%d&quot;)</code></pre>
 <pre><code>## [1] &quot;02/14&quot;</code></pre>
 <pre class="r"><code>strftime(time, &quot;%Y-%m-%d&quot;)</code></pre>
@@ -309,7 +309,17 @@ iris_na</code></pre>
 <li>SQL의 JOIN과 비슷하다</li>
 </ul>
 <pre class="r"><code>df1 &lt;- data.frame(x = c(1, 2, 3), y = c(2, 1, 3))
-df2 &lt;- data.frame(x = c(1, 3), a = 10, b = &quot;a&quot;)</code></pre>
+df2 &lt;- data.frame(x = c(1, 3), a = 10, b = &quot;a&quot;)
+
+df1</code></pre>
+<pre><code>##   x y
+## 1 1 2
+## 2 2 1
+## 3 3 3</code></pre>
+<pre class="r"><code>df2</code></pre>
+<pre><code>##   x  a b
+## 1 1 10 a
+## 2 3 10 a</code></pre>
 <div id="basemerge" class="section level3">
 <h3>base::merge</h3>
 <ul>
