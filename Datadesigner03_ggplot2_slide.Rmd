@@ -1,0 +1,497 @@
+---
+title: "ggplot2"
+author: "Mino"
+date: "Saturday, February 28, 2015"
+output:
+  ioslides_presentation:
+    css: font.css
+    highlight: tango
+    logo: C:/Users/Administrator/Pictures/datadesigner0.png
+    widescreen: yes
+---
+
+## ggplot2
+
+- Leland Wilkinson **“The Grammar of Graphics”**
+
+<br>
+
+- 데이터 그래픽을 어떻게 기술하는지에 대해 형식적이고 구조적인 시각을 취하고 있다
+
+## Data Graphic
+
+<br>
+
+- 데이터의 속성들을 그래픽의 시각적인 속성들에 대입(또는 대응) 한다.
+
+<br>
+
+- 보통 데이터 속성은 수치형 / 범주형 변수
+
+<br>
+
+- 시각적인 속성은 점의 X, Y 위치, 선의 색깔, 막대의 높이 등
+
+## Data Graphic : R 기본함수의 경우
+
+<br>
+
+- 데이터 속성을 시각적 속성에 대입하는 방법이 때에 따라 다르다
+
+<br>
+
+- 대입을 바꾸려면 데이터 자체의 구조를 바꿔야 할 때도 있다
+
+<br>
+
+- 완전히 새로운 커맨드를 입력하기도 한다.
+
+<br>
+
+- 구조도 바꾸고 커맨드도 새로 쓰기도 한다……
+
+## Data Graphic : R 기본함수의 경우
+
+```{r}
+#install.packages("gcookbook")
+library(gcookbook)
+simpledat
+```
+
+넓은 형식의 데이터(Wide Format)
+
+## Data Graphic : R 기본함수의 경우
+
+```{r}
+barplot(simpledat, beside=TRUE)
+```
+
+## Data Graphic : R 기본함수의 경우
+
+```{r, fig.width = 4, fig.height=3.5}
+plot(simpledat[1,] ,type = 'l')
+lines(simpledat[2,], type = 'l', col = "blue")
+```
+
+- 막대 그래프와 선그래프를 만드는 방식이 **완전히** 다르다
+
+## Data Graphic : ggplot2
+
+```{r}
+simpledat_long
+```
+
+- 필요한 데이터의 구조가 언제나 동일하다
+
+- 긴 형식의 데이터(Long Format)
+
+- *Tidy Data*
+
+
+## ggplot2의 구성
+
+```{r, echo = FALSE}
+simpledat_long
+```
+
+- X = Aval
+
+- fill = Bval
+
+- Y = value
+
+- 그래프의 형태 = **geom_bar**
+
+## ggplot2의 구성
+
+```{r, fig.width = 6, fig.height=3.5}
+#install.packages("ggplot2")
+library(ggplot2)
+ggplot(simpledat_long, aes(x = Aval, y = value, fill = Bval)) + 
+  geom_bar(stat = "identity", position = "dodge")
+```
+
+## ggplot2의 구성
+```{r, fig.width = 6, fig.height=3.5}
+ggplot(simpledat_long, 
+       aes(x = Aval, y = value, colour = Bval, group = Bval)) +
+  geom_line()
+```
+
+## Grammar of Graphics : ggplot2의 문법구조
+
+**Plot의 구성요소**
+
+  - A set of layers
+  
+  - A set of scales
+  
+  - A coordinate system
+  
+  - A facetting specification
+  
+## Grammar of Graphics : ggplot2의 문법구조
+
+**Layer의 구성요소**
+
+  - Data
+  
+  - Mapping
+  
+  - Statistical Tranformation
+  
+  - Geometric Object
+  
+  - Position
+
+## Grammar of Graphics : ggplot2의 문법구조
+
+**Scales**
+
+- Scale은 데이터값이 에스테틱에 대입되는 과정을 조절하고 guide(축과 범례 등)가 어떻게 표시될지를 결정한다
+
+- 보통 ggplot이 알아서 scale을 추가하지만, 원하는 사항에 대해서는 명시해주어야 한다.
+
+**Coordinate systems**
+
+- 좌표를 결정하는 에스테틱들이 어떻게 연결되는지를 결정한다
+
+- 기본값은 Cartesian 좌표평면이다
+
+- stat과 geom이 반영된 이후에 변경할 수 있다
+  
+ggplot에는 **Defaults + Layers + Scales + Coordinate System** 의 형태로 적용
+
+## how to make a plot?
+
+- length vs width의 산점도(scatter plot)를 그려보자
+
+length | width | trt
+-------|-------|------
+2      |3      |a
+1      |2      |a
+4      |5      |b
+9      |10     |b
+
+------------------------
+
+- 산점도(scatter plot)를 그리기 위해 고려해야 할 것은 무엇일까?
+
+    <br>
+    
+    - 값들을 점으로 표현 (geom : point)
+
+    <br>
+    
+    - 값은 변형없이 그대로 사용 (stat : identity)
+    
+    <br>
+    
+    - X, Y축에는 linear scaling (scales)
+    
+    <br>
+    
+    - Cartesian 좌표평면 적용
+    
+--------------------------    
+    
+- Mapping
+    - length -> `x`
+    - width -> `y`
+    - trt -> `colour (color)`
+
+
+x  |y  |colour
+---|---|--------
+2  |3  |a
+1  |2  |a
+4  |5  |b
+9  |10 |b
+
+--------------------------
+
+- Scales
+    - 실제로 그래프를 그리는데 사용할 값들로 변경한다
+
+x  |y  |colour
+---|---|--------
+25 |11 |red
+0  |0  |red
+75 |53 |blue
+200|300|blue
+
+<br>
+
+- Coordinate System
+    - Cartesian(Default)
+  
+-------------------------
+
+```{r, echo=FALSE}
+smp = data.frame(length = c(2,1,4,9), width = c(3,2,5,10), trt=c('a','a','b','b'))
+ggplot(smp, aes(x = length, y = width)) + geom_point(aes(colour = trt), size = 10)
+```
+
+## ggplot2로 그래프 그리기
+
+**Drawing Layers**
+
+그래프를 그리는데 필요한 요소들을 레이어에 대입시켜서 원하는 그래프를 얻을 수 있다
+
+```{r, eval =FALSE}
+library(ggplot2)
+ggplot() + 
+  layer(data = movies, 
+        mapping = aes(x=votes), 
+        geom = "bar", 
+        stat = "bin", 
+        position = "identity")
+```
+
+-------------------------------
+
+**Drawing Layers with short cut**
+
+레이어를 이용해서 직접 그리는 것은 명확하지만 코드가 너무 길어지는 경향이 있다. 
+
+레이어에 적용될 요소들을 미리 정의해놓은 함수들을 이용해서 그래프를 그릴 수 있다
+
+```{r, eval = FALSE}
+ggplot() + 
+  geom_bar(data = movies, aes(x=votes))
+```
+
+-------------------------------
+
+**Multiple Layers**
+
+여러개의 레이어를 중첩시켜서 그릴 수 있다
+
+```{r, eval = FALSE}
+ggplot() + 
+  geom_point(data = mpg, aes(displ, hwy)) + 
+  geom_smooth(data = mpg, aes(displ, hwy))
+```
+
+-------------------------------
+
+**Avoid redundancy**
+
+공통적으로 반영되는 요소들은 미리 정의해두면 geom이나 stat을 추가할 때 자동적으로 상속받게 된다.
+
+추가되는 geom / stat에서 반영되는 요소들은 상속되지 않는다
+
+또, ggplot을 이용해 만든 결과물들은 객체로 저장하는 것이 가능하다
+
+Mapping되는 부분까지만 객체로 저장한 다음에 다양한 시각화를 시도해 볼 수 있다.
+
+```{r, eval=FALSE}
+mpgplot <- ggplot(data = mpg, aes(displ, hwy)) # 객체로 저장
+mpgplot + 
+  geom_point() + 
+  geom_smooth()
+```
+
+-------------------------------
+
+**Adding parameters**
+
+geom의 형태나 stat이 적용되는 방법 등을 변경할 수 있다
+
+<br>
+
+`geom_point(colour = "red")`
+
+`geom_point(alpha = 0.3)` 투명도 조절
+
+<br>
+
+`geom_smooth(linetype = 2)` 선 모양 변경
+
+`geom_smooth(method = "lm")` 회귀선을 직선으로 명시
+
+`geom_smooth(se = FALSE)` 신뢰구간을 표시하지 않는다
+
+-----------------------------------
+
+**Position Adjustment**
+
+position을 지정하여 geom이 보여지는 형태를 변경할 수 있다
+
+<br>
+
+`geom_point(position = "jitter")`  x, y값에 난수를 더해서 점이 겹치지 않게 한다
+
+
+`geom_bar(position="stack")` 누적막대
+
+`geom_bar(position="fill")` 막대 길이가 일정한 누적막대(%)
+
+`geom_bar(position="dodge")` 각 막대를 옆으로 나열한다
+
+
+`geom_freqpoly(position = "identity")` 값을 그대로 표현
+
+`geom_freqpoly(position = "stack")` 누적
+
+------------------------------
+
+**Scales**
+
+스케일 관련함수는 `scale_에스테틱이름_적용방법`으로 이름이 결정된다
+
+위치 스케일의 경우 `xlim()`과 `ylim()` 함수로 그래프에 표현할 값의 범위를 한정지을 수 있다
+
+```{r, eval = FALSE}
+ggplot(data = mpg, aes(displ, hwy)) + 
+  geom_point() + 
+  geom_smooth() + 
+  xlim(4,6)
+ggplot(data = mpg, aes(displ, hwy)) + 
+  geom_point() + 
+  geom_smooth() + 
+  ylim(20,30)
+
+dia_bar <- ggplot(diamonds, aes(x=cut, fill = cut)) + geom_bar()
+dia_bar + 
+  scale_fill_brewer()
+```
+
+----------------------------------------
+
+*RColorBrewer* 패키지를 설치하면 미리 정의된 다양한 색조합을 사용할 수 있다. 
+
+사용가능한 색 조합의 이름들은 `display.brewer.all()`에서 확인할 수 있다.
+
+```{r, eval = FALSE}
+#install.packages("RColorBrewer")
+RColorBrewer::display.brewer.all()
+
+dia_bar + 
+  scale_fill_brewer(palette = "Paired")
+dia_bar + 
+  scale_fill_brewer(palette = "Accent")
+
+dia_bar + 
+  scale_fill_brewer(palette = "Accent") + 
+  scale_y_continuous(trans = "log10") # y축에 log10 함수를 적용
+dia_bar + 
+  scale_y_continuous(breaks = c(5000, 15000)) # 5000, 15000 구간만 표시
+```
+-----------------------------------------
+
+```{r, echo = FALSE, fig.height = 7}
+#install.packages("RColorBrewer")
+RColorBrewer::display.brewer.all()
+```
+
+-----------------------------
+
+**Coordinate system**
+
+기본적으로는 *Cartesian Coordinate System*이 적용된다
+
+x축과 y축을 바꾸고 싶을 때에는 `coord_flip()`을 적용할 수 있으며
+
+`coord_polar()`를 통해 극좌표계로 변환이 가능하다
+
+
+```{r, eval = FALSE}
+ggplot(data = mpg, aes(displ, hwy)) + 
+  geom_point() + 
+  geom_smooth() + 
+  coord_flip() # x, y축 변경
+
+ggplot(data = mpg, aes(displ, hwy)) + 
+  geom_point() + 
+  geom_smooth() + 
+  coord_polar()
+```
+
+---------------------------------------
+
+**Facetting**
+
+데이터의 부분 집합들을 하위 그래프로 분리해서 그릴 수 있다
+
+`facet_grid()`또는 `facet_wrap()`을 사용하고 분리할 변수들을 지정한다.
+
+`facet_wrap()`을 사용하면 하위 그래프들이 수평으로 나열된다
+
+`facet_grid()`수직과 수평으로 각각 다른 변수를 지정할 수 있다
+
+
+```{r, eval = FALSE}
+mtc_point <- ggplot(mtcars, aes(mpg, wt)) + geom_point()
+mtc_point + 
+  facet_wrap(~cyl)
+mtc_point + 
+  facet_wrap(~cyl, ncol = 2)
+mtc_point + 
+  facet_wrap(~cyl+gear)
+mtc_point + 
+  facet_grid(gear~cyl)
+```
+
+----------------------------------
+
+`scales`옵션을 조정하면 축이 서로 다른 면을 만들 수 있다
+
+`"free"` 는 x, y축 눈금을 모두 자유롭게하고, `"free_x"` 또는 `"free_y"`를 통해 각각의 눈금을 자유롭게 둘 수 있다
+
+
+```{r, eval = FALSE}
+mtc_point + 
+  facet_wrap(~cyl, scales = "fixed")
+mtc_point + 
+  facet_wrap(~cyl, scales = "free")
+mtc_point + 
+  facet_wrap(~cyl, scales = "free_x")
+
+mtc_point + 
+  facet_grid(gear~cyl, scales = "free_x")
+mtc_point + 
+  facet_grid(gear~cyl, scales = "free")
+mtc_point + 
+  facet_grid(gear~cyl, scales = "free", space = "free")
+```
+
+---------------------------------
+
+**Theme**
+
+그래프의 세부적인 요소들을 조절해서 테마로 저장하는 것이 가능하다
+
+기본적으로 ggplot에서 제공하는 테마도 있으며 패키지로 배포되는 테마들도 있다
+
+예제에서는 ggplot2의 기본 테마와 *ggthemes* 패키지의 테마를 일부 적용해보았다
+
+```{r, eval = FALSE}
+dia_bar + theme_gray()
+dia_bar + theme_bw()
+dia_bar + theme_classic()
+```
+
+-----------------------------
+
+```{r, eval = FALSE}
+# install.packages("ggthemes")
+library(ggthemes)
+dia_bar + theme_economist() + scale_colour_economist()
+dia_bar + theme_excel()
+dia_bar + theme_solarized()
+
+ggplot(diamonds, aes(x = carat, y = price, colour = clarity)) + 
+  geom_point() + 
+  scale_colour_colorblind() # 색각이상자를 위한 색조합
+```
+
+## 참고자료
+
+<http://docs.ggplot2.org/current/>
+
+<http://ggplot2.org/resources/2007-vanderbilt.pdf>
+
+R graphics cookbook
+
+[R기반의 데이터 시각화](http://freesearch.pe.kr/wp-content/uploads/Rvis_20130503.pdf)
