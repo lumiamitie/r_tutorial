@@ -61,13 +61,15 @@ library(RCurl)
 
 XPath에 대한 설명은 [위키피디아](http://ko.wikipedia.org/wiki/XPath)로 대신하도록 한다
 
+---
+
 이제 위 Xpath에 해당하는 항목을 R로 불러보자
 
 ```{r}
 url = "http://eungdapso.seoul.go.kr/Community/WonSoon_List.jsp"
 SOURCE = getURL(url)
 PARSED = htmlParse(SOURCE)
-xpathSApply(PARSED,'//*[@id="contents"]/form/table[2]/tbody/tr[7]/td[2]/a',xmlValue)
+xpathSApply(PARSED,"//*[@id='contents']/form/table[2]/tbody/tr[7]/td[2]/a",xmlValue)
 ```
 
 각각의 항목을 살펴보면
@@ -78,7 +80,7 @@ xpathSApply(PARSED,'//*[@id="contents"]/form/table[2]/tbody/tr[7]/td[2]/a',xmlVa
 
 이 자료를 `xpathSApply`함수를 통해 원하는 항목(크롬에서 찾은 XPath)의 자료(xmlvalue)를 가져오게 된다
 
-여기서 조심해야 할 점은 `id="contents"` 항목에 큰따옴표가 쓰이기 때문에 Xpath 주소를 텍스트 형태로 처리하기 위해서 큰따옴표를 쓰면 텍스트가 중간에 끊기는 불상사가 발생한다. 위 코드처럼 작은따옴표로 묶어주자
+여기서 조심해야 할 점은 `id="contents"` 항목에 큰따옴표가 쓰이기 때문에 Xpath 주소를 텍스트 형태로 처리하기 위해서 큰따옴표를 쓰면 텍스트가 중간에 끊기는 불상사가 발생한다. 위 코드처럼 contents를 작은따옴표로 묶어주자 `id='contents'`
 
 
 이제 다음(아래) 항목에 대한 XPath도 찾아보자
@@ -99,6 +101,8 @@ td[]의 숫자가 변경되었고 맨 마지막에 `/a` 부분이 없다는 점�
 모든 열을 살펴보면 제목에 해당하는 두 번째 열만 `/a`로 끝나고 있다
 
 
+---
+
 이제 현재 보이는 페이지에 있는 데이터를 불러와보자
 
 tr[]과 td[]내의 값을 변경해야 하니 텍스트를 쪼개서 paste로 합치도록 하자
@@ -109,6 +113,8 @@ xpath_2 = "]/td["
 xpath_3 = "]/a"
 ```
 
+
+
 이제 `tr[1]/td[2]/a` 의 항목을 가져오려면
 
 ```{r}
@@ -116,6 +122,8 @@ paste0(xpath_1,1,xpath_2,2,xpath_3)
 ```
 
 를 사용하면 된다. 제목이 있는 열에 대해서는 위의 코드를 xpath로 지정하면 된다
+
+
 
 나머지 열에 대해서는
 
@@ -159,6 +167,8 @@ seoul_new = data.frame(no     = seoul_titleno,
                        hit    = as.numeric(seoul_hit))
 ```
 
+
+
 각 열을 서로 다른 벡터에 저장한 후에 `data.frame`으로 묶는다
 
 그러면 다음과 같이 자료가 들어온 것을 확인할 수 있다.
@@ -188,6 +198,7 @@ tr[]과 td[]의 값이 위치에 따라 동일하다는 것을 알 수 있었다
 [stackoverflow](http://stackoverflow.com/questions/21988215/scrape-the-data-with-rcurl)의 관련 글을 참고하는 것도 도움이 될 것 같다
 
 `http://eungdapso.seoul.go.kr/Community/WonSoon_List.jsp?page=5`의 형태로 page와 값을 명시해주면 원하는 페이지로 바로 접속하는 것이 가능하다. 그러면 url의 텍스트를 쪼개서 page값을 계속 변경해주면 위에서 썼던 방법을 통해 자료를 불러올 수 있다
+
 
 ----
 

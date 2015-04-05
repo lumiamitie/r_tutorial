@@ -101,17 +101,18 @@ library(RCurl)</code></pre>
 <p>//*<span class="citation">[@id=&quot;contents&quot;]</span>/form/table[2]/tbody/tr[7]/td[2]/a</p>
 </blockquote>
 <p>XPath에 대한 설명은 <a href="http://ko.wikipedia.org/wiki/XPath">위키피디아</a>로 대신하도록 한다</p>
+<hr />
 <p>이제 위 Xpath에 해당하는 항목을 R로 불러보자</p>
 <pre class="r"><code>url = &quot;http://eungdapso.seoul.go.kr/Community/WonSoon_List.jsp&quot;
 SOURCE = getURL(url)
 PARSED = htmlParse(SOURCE)
-xpathSApply(PARSED,'//*[@id=&quot;contents&quot;]/form/table[2]/tbody/tr[7]/td[2]/a',xmlValue)</code></pre>
+xpathSApply(PARSED,&quot;//*[@id='contents']/form/table[2]/tbody/tr[7]/td[2]/a&quot;,xmlValue)</code></pre>
 <pre><code>## [1] &quot;잃어버린 엄마,아빠의 보금자리를 돌려주세요.&quot;</code></pre>
 <p>각각의 항목을 살펴보면</p>
 <p><code>getURL(url)</code>을 통해 원하는 url의 정보들을 가져온 후에</p>
 <p><code>htmlParse(SOURCE)</code>로 실제로 우리가 보는 html 형태로 변형을 시켜준다</p>
 <p>이 자료를 <code>xpathSApply</code>함수를 통해 원하는 항목(크롬에서 찾은 XPath)의 자료(xmlvalue)를 가져오게 된다</p>
-<p>여기서 조심해야 할 점은 <code>id=&quot;contents&quot;</code> 항목에 큰따옴표가 쓰이기 때문에 Xpath 주소를 텍스트 형태로 처리하기 위해서 큰따옴표를 쓰면 텍스트가 중간에 끊기는 불상사가 발생한다. 위 코드처럼 작은따옴표로 묶어주자</p>
+<p>여기서 조심해야 할 점은 <code>id=&quot;contents&quot;</code> 항목에 큰따옴표가 쓰이기 때문에 Xpath 주소를 텍스트 형태로 처리하기 위해서 큰따옴표를 쓰면 텍스트가 중간에 끊기는 불상사가 발생한다. 위 코드처럼 contents를 작은따옴표로 묶어주자 <code>id='contents'</code></p>
 <p>이제 다음(아래) 항목에 대한 XPath도 찾아보자</p>
 <blockquote>
 <p>//*<span class="citation">[@id=&quot;contents&quot;]</span>/form/table[2]/tbody/tr[8]/td[2]/a</p>
@@ -124,6 +125,7 @@ xpathSApply(PARSED,'//*[@id=&quot;contents&quot;]/form/table[2]/tbody/tr[7]/td[2
 </blockquote>
 <p>td[]의 숫자가 변경되었고 맨 마지막에 <code>/a</code> 부분이 없다는 점을 알 수 있다</p>
 <p>모든 열을 살펴보면 제목에 해당하는 두 번째 열만 <code>/a</code>로 끝나고 있다</p>
+<hr />
 <p>이제 현재 보이는 페이지에 있는 데이터를 불러와보자</p>
 <p>tr[]과 td[]내의 값을 변경해야 하니 텍스트를 쪼개서 paste로 합치도록 하자</p>
 <pre class="r"><code>xpath_1 = &quot;//*[@id='contents']/form/table[2]/tbody/tr[&quot;
